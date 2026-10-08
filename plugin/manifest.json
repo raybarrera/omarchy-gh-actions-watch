@@ -22,16 +22,16 @@
     "defaults": {
       "account": "",
       "host": "",
-      "refreshIntervalSec": 300,
+      "refreshIntervalSec": 60,
       "maxRepos": 30,
       "includeQueued": false
     },
     "schema": [
       { "key": "account", "type": "string", "label": "GitHub account", "defaultValue": "", "description": "User or org login to watch. Leave empty to watch the account gh is authenticated as." },
       { "key": "host", "type": "string", "label": "GitHub host", "defaultValue": "", "description": "Optional hostname for GitHub Enterprise. Leave empty for github.com." },
-      { "key": "refreshIntervalSec", "type": "integer", "label": "Refresh interval (seconds)", "min": 60, "max": 1800, "step": 60, "defaultValue": 300, "description": "Polls use one conditional request per repo; unchanged repos return 304. Default is five minutes to stay gentle on the GitHub API." },
-      { "key": "maxRepos", "type": "integer", "label": "Max repos to scan", "min": 5, "max": 100, "step": 5, "defaultValue": 30, "description": "Most recently pushed repos are scanned first. Lower this to reduce calls on the first poll; unchanged polls use conditional requests." },
-      { "key": "includeQueued", "type": "boolean", "label": "Include queued runs", "defaultValue": false, "description": "Adds one extra API request per repo. Off by default to reduce rate-limit use; manual refresh always includes queued runs." },
+      { "key": "refreshIntervalSec", "type": "integer", "label": "Refresh interval (seconds)", "min": 60, "max": 1800, "step": 60, "defaultValue": 60, "description": "Only applies while the panel is open; nothing is polled when it is closed. Each poll uses one conditional request per repo and unchanged repos return 304." },
+      { "key": "maxRepos", "type": "integer", "label": "Max repos to scan", "min": 5, "max": 100, "step": 5, "defaultValue": 30, "description": "Most recently pushed repos are scanned first. Lower this to reduce calls on the first poll after opening." },
+      { "key": "includeQueued", "type": "boolean", "label": "Include queued runs", "defaultValue": false, "description": "Adds one extra API request per repo. Off by default to reduce rate-limit use; manual refresh always includes queued runs." }
     ]
   }
 }

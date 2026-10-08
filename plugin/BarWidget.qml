@@ -11,8 +11,12 @@ import "Model.js" as Model
 //
 // All GitHub access lives in the omarchy-gh-actions-watch helper (a Go binary
 // that talks to the API through the authenticated gh CLI). This file only runs
-// that helper on a timer and renders its JSON, mirroring how omarchy.agents and
+// that helper and renders its JSON, mirroring how omarchy.agents and
 // omarchy.weather shell out to their collectors.
+//
+// Polling is lazy: nothing touches GitHub until the panel is opened by hand.
+// While it stays open the helper re-runs every refresh interval so the listed
+// runs are followed; closing the panel stops all polling.
 BarWidget {
   id: root
   moduleName: "io.github.raybarrera.gh-actions-watch"
@@ -24,7 +28,7 @@ BarWidget {
 
   readonly property string account: String(setting("account", "") || "")
   readonly property string host: String(setting("host", "") || "")
-  readonly property int refreshSec: Math.max(60, parseInt(setting("refreshIntervalSec", 300), 10) || 300)
+  readonly property int refreshSec: Math.max(60, parseInt(setting("refreshIntervalSec", 60), 10) || 60)
   readonly property int maxRepos: Math.max(1, parseInt(setting("maxRepos", 30), 10) || 30)
   readonly property int includeQueued: setting("includeQueued", false) ? 1 : 0
 
@@ -89,7 +93,7 @@ BarWidget {
   onBarChanged: root.injectPanel()
   onSettingsChanged: {
     root.injectPanel()
-    root.refresh()
+    if (root.opened) root.refresh()
   }
 
   Process {
@@ -107,9 +111,8 @@ BarWidget {
 
   Timer {
     interval: root.refreshSec * 1000
-    running: true
+    running: root.opened
     repeat: true
-    triggeredOnStart: true
     onTriggered: root.refresh()
   }
 
@@ -144,7 +147,7 @@ BarWidget {
     fontSize: Style.font.caption
     active: root.activeCount > 0
     useActiveColor: true
-    tooltipText: Model.tooltip(root.snapshot)
+    tooltipText: root.snapshot.generatedAt === "" ? "GitHub Actions: open to check" : Model.tooltip(root.snapshot)
     onPressed: function(b) {
       if (b === Qt.RightButton) root.refreshQueued()
       else root.toggle()

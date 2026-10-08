@@ -6,8 +6,12 @@ account (user or org). Click the bar icon to open a panel listing each active ru
 with its repo, workflow, branch, event, elapsed time, and a link.
 
 The GitHub API work lives in a small **Go** helper binary. The QML widget only runs
-that helper on a timer and renders its JSON, following the same split Omarchy uses
+that helper and renders its JSON, following the same split Omarchy uses
 for `omarchy.agents` and `omarchy.weather`.
+
+Polling is lazy. Nothing contacts GitHub until you open the panel by hand. While the
+panel stays open the helper re-runs every `refreshIntervalSec` so the listed runs are
+followed. Closing the panel stops all polling.
 
 ```
  bar:   []  GitHub glyph + count chip  (2 = two active runs, ! = error)
@@ -58,7 +62,7 @@ progress; that costs extra API calls per active run and is intentionally not don
   cache lives under `$XDG_STATE_HOME/omarchy/gh-actions-watch/` (fallback:
   `~/.local/state/omarchy/gh-actions-watch/`). Cache files are created private (0600).
 - Repo enumeration is cached for 30 minutes. Requests are serialized, one per repo,
-  with a 300-second widget interval and a 30-repo default cap. The helper parses
+  with a 60-second interval that runs only while the panel is open and a 30-repo default cap. The helper parses
   rate-limit headers, stops below 200 remaining (or on 403/429), and serves the last
   cached snapshot until the reset time.
 - **Rate-limit caveat:** conditional requests reduce response body transfer and return
@@ -100,17 +104,18 @@ Settings are stored per-widget in `~/.config/omarchy/shell.json` and can be set 
 |-----|---------|---------|
 | `account` | `""` (your `gh` login) | GitHub user or org login to watch |
 | `host` | `""` (github.com) | GitHub Enterprise hostname passed to `gh --hostname` |
-| `refreshIntervalSec` | `300` | Poll interval; unchanged ETags reuse cached responses. |
+| `refreshIntervalSec` | `60` | Poll interval while the panel is open. Nothing is polled when it is closed. |
 | `maxRepos` | `30` | Most-recently-pushed repos to scan; reduces first-poll cost. |
 
 ```sh
 omarchy bar set io.github.raybarrera.gh-actions-watch account your-org --json
-omarchy bar set io.github.raybarrera.gh-actions-watch refreshIntervalSec 300 --json
+omarchy bar set io.github.raybarrera.gh-actions-watch refreshIntervalSec 120 --json
 ```
 
 ## Use
 
-- **Left click** the bar icon: open/close the panel.
+- **Left click** the bar icon: open/close the panel. Opening it checks GitHub; the badge
+  shows the last result and is empty until the first open.
 - **Right click**: refresh immediately.
 - **Click a run row**: open that run on GitHub.
 - **Escape**: close the panel.
