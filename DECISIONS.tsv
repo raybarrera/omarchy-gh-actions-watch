@@ -1,0 +1,22 @@
+ts	phase	decision	why	evidence	result
+2026-10-07T16:35	assess	Work kind = change behavior (greenfield plugin)	Empty project dir, new build requested	ls of cwd shows only .crush	Proceeded to build
+2026-10-07T16:40	understand	Split: Go helper does GitHub I/O, QML renders JSON	Matches omarchy.agents/omarchy.weather collector pattern; develop.html forbids a 2nd Quickshell	shell/plugins/agents/Main.qml runs omarchy-agent-usage-update via Process	Adopted
+2026-10-07T16:44	understand	Enumerate repos then query per-repo runs	/orgs/{org}/actions/runs returns 404 even for a member org with read:org/repo/workflow scopes	gh api /orgs/<member-org>/actions/runs -> 404; /repos/{o}/{r}/actions/runs -> 200	Adopted
+2026-10-07T16:45	understand	Delegate auth/transport to installed gh CLI	Avoids storing tokens; gh already authenticated via keyring	gh auth status -> Logged in (keyring)	Adopted
+2026-10-07T16:52	build	Go stdlib only, no external modules	Keeps go build offline and dependency-free	go.mod has no require block	go build ./... OK
+2026-10-07T17:05	build	Helper always exits 0, errors go in JSON .error	Panel can render a message instead of failing silently	-bad account -> JSON error, exit=0	Adopted
+2026-10-07T17:12	verify	qmllint is non-gating in this environment	Documented qmllint -I $OMARCHY_PATH/shell exits 255 with no output even on first-party clock plugin	qmllint on plugins/panels/clock/BarWidget.qml -> exit 255	Used live-shell load instead
+2026-10-07T17:20	verify	Live-shell load is the authoritative QML check	Shell reload + qs log surfaces real runtime errors	install -> rescan -> summon -> qs log shows our module errors	Adopted
+2026-10-07T17:30	fix	Panel.qml row height bound to undefined id titleRow	Delegate threw ReferenceError: titleRow is not defined at Panel.qml[117:17]	qs log WARN ReferenceError titleRow (30+ hits)	Replaced with Math.max(repoText.implicitHeight,statusText.implicitHeight)
+2026-10-07T17:45	verify	Red-green proof of the delegate fix	Mock helper forces rows so the delegate instantiates deterministically	buggy file delta=+4 titleRow errors; fixed file post shell-restart delta=0	Fixed
+2026-10-07T17:50	verify	Shell restart required to load changed QML	rescanPlugins/cache-clear did not swap the already-instantiated component	titleRow errors persisted with a titleRow-free file until omarchy restart shell	New pid loaded fixed file, 0 errors
+2026-10-07T17:55	verify	Confirmed widget is live and polling	Call-logging mock proved the Process runs the helper	/tmp/ghwatch-mock.called: called args=-max-repos 60	Widget live
+2026-10-08T00:20	publish	Skip PR	No git remote configured and global rules forbid commit/push without explicit request	git init done locally, no remote; user did not ask to commit	Left work in tree, installed and verified
+2026-10-08T00:30	assess	Work kind = reshape (PII audit + UI redesign)	Follow-up request on the built plugin	user request	Proceeded
+2026-10-08T00:32	verify	PII/secrets audit of the tree	Directory will become a public repo	rg for tokens/emails/home-paths/org names/IPs across tracked files	No secrets; .crush/ and bin/ git-ignored; only source would commit
+2026-10-08T00:33	fix	Genericize a real org name in docs	Org membership is sensitive for a public repo	DECISIONS.tsv + README referenced a member org	Replaced with <member-org>/your-org placeholders
+2026-10-08T00:34	assess	Keep author GitHub handle in id/module/author	Omarchy requires io.github.<user>.* ids; handle is public, not secret	develop.html namespacing rule; 16 structural occurrences	Kept; documented how to rename in README
+2026-10-08T00:40	build	Redesign panel: spacious + Charm/TUI + progress visuals	User asked for spacious UI, visuals over text, charm look	Panel.qml rewritten; width 460, spacing 16, cards, chips	Done
+2026-10-08T00:42	build	Draw meters with Rectangles, not block glyphs	Block/braille glyph coverage varies by font; tofu risk	gauge + activity bars built from Rectangle cells/fills	Font-independent
+2026-10-08T00:44	build	Only the running/queued gauge is determinate	Active-run API record has no total duration, so no honest per-run %	/ actions/runs fields lack a duration total	Per-run bars are indeterminate sweep/pulse; documented
+2026-10-08T00:50	verify	Reload new QML via shell restart, then render both states	Changed QML does not hot-swap in a running shell	omarchy restart shell -> new pid; summon populated(mock)+empty(real)	0 warnings/errors for the plugin; helper invoked

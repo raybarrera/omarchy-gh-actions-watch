@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.raybarrera.gh-actions-watch",
+  "name": "GitHub Actions Watch",
+  "version": "1.0.0",
+  "author": "raybarrera",
+  "license": "MIT",
+  "description": "Bar widget showing currently running and queued GitHub Actions workflow runs for a GitHub account, backed by a Go helper.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "GitHub Actions Watch",
+    "description": "One bar icon and one panel: how many Actions runs are in progress or queued right now for a GitHub user or org, with repo, workflow, branch, and elapsed time for each.",
+    "category": "Dev",
+    "aliases": ["gh-actions", "github-actions", "ci"],
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "account": "",
+      "host": "",
+      "refreshIntervalSec": 60,
+      "maxRepos": 30,
+      "includeQueued": false
+    },
+    "schema": [
+      { "key": "account", "type": "string", "label": "GitHub account", "defaultValue": "", "description": "User or org login to watch. Leave empty to watch the account gh is authenticated as." },
+      { "key": "host", "type": "string", "label": "GitHub host", "defaultValue": "", "description": "Optional hostname for GitHub Enterprise. Leave empty for github.com." },
+      { "key": "refreshIntervalSec", "type": "integer", "label": "Refresh interval (seconds)", "min": 60, "max": 1800, "step": 60, "defaultValue": 60, "description": "Only applies while the panel is open; nothing is polled when it is closed. Each poll uses one conditional request per repo and unchanged repos return 304." },
+      { "key": "maxRepos", "type": "integer", "label": "Max repos to scan", "min": 5, "max": 100, "step": 5, "defaultValue": 30, "description": "Most recently pushed repos are scanned first. Lower this to reduce calls on the first poll after opening." },
+      { "key": "includeQueued", "type": "boolean", "label": "Include queued runs", "defaultValue": false, "description": "Adds one extra API request per repo. Off by default to reduce rate-limit use; manual refresh always includes queued runs." }
+    ]
+  }
+}
