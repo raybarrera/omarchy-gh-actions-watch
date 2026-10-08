@@ -1,0 +1,62 @@
+# Build output
+/bin/
+/dist/
+*.exe
+*.test
+*.out
+*.prof
+coverage.*
+
+# Go
+/vendor/
+go.work
+go.work.sum
+
+# Runtime state and cache (ETags, cached API responses, account names)
+cache.json
+cache.json.tmp
+*.db
+*.sqlite*
+
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.token
+*.secret
+secrets.*
+credentials*
+hosts.yml
+.netrc
+
+# Logs
+*.log
+logs/
+
+# AI agent tooling and session state
+.claude/
+.crush/
+.cursor/
+.aider*
+CLAUDE.local.md
+.mcp.json
+
+# Editors and OS
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Scratch and mock files
+*.tmp
+*.bak
+*.orig
+*.rej
+/tmp/
